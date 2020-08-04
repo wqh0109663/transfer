@@ -1,0 +1,24 @@
+<meta charset="UTF-8">
+<#include "/common/content-title.html"/>
+<div class="list" id="page-list" type="list">
+	<div id="search" class="search">
+		<span class="search-item" style="width:220px;">名称：<input type="text" id="searchName" class="input"></span>
+		<span class="button" onclick="$.dynamicJs.loadList();"><i class="layui-icon">&#xe615;</i><span>查询</span></span>
+		<span class="button add" onclick="$.dynamicJs.addDataSource();"><i class="layui-icon">&#xe654;</i><span>增加</span></span>
+		<span class="button delete" onclick="$.dynamicJs.deleteDataSources();"><i class="layui-icon">&#x1006;</i><span>删除</span></span>
+		<span class="button recycle" onclick="$.dynamicJs.dataSourceRecycle();"><i class="layui-icon">&#xe640;</i><span>回收站</span></span>
+	</div>
+	<div class="list-data layui-form" id="list-container">
+		<table class="layui-hide" id="dataSource-list" lay-filter="dataSource-list"></table>
+	</div>
+	<script type="text/html" id="moveToolBar">
+  		<span class="up-icon" lay-event="up" style="display:{{ d.orderNo<=d.minOrderNo?'none':''}};"></span>
+  		<span class="down-icon" lay-event="down" style="display:{{ d.orderNo>=d.maxOrderNo?'none':''}};"></span>
+	</script>
+	<script type="text/html" id="toolBar">
+  		<a class="layui-btn layui-btn-xs" lay-event="edit"><i class="layui-icon" auth="true">&#xe642;</i>编辑</a>
+  		<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del"><i class="layui-icon" auth="true">&#x1006;</i>删除</a>
+	</script>
+</div>
+<script type="text/javascript" src="${path!''}/base/js/common/content-list.js"></script>
+<script type="text/javascript" src="${path!''}/js/transfer/dataSource/dataSource-list.js"></script>

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans 
+            http://www.springframework.org/schema/beans/spring-beans-4.0.xsd  
+            http://www.springframework.org/schema/context 
+            http://www.springframework.org/schema/context/spring-context-4.0.xsd  
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd  
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+            http://www.springframework.org/schema/rabbit http://www.springframework.org/schema/rabbit/spring-rabbit.xsd">
+    <!-- class annotation related... start -->
+    <aop:aspectj-autoproxy/>
+    <context:component-scan base-package="org.unswift" use-default-filters="false">
+        <context:include-filter type="regex" expression="org\.unswift\.[\w\.]+\.aop\.[^.]+"/>
+        <context:include-filter type="regex" expression="org\.unswift\.[\w\.]+\.service\.[^.]+"/>
+        <context:include-filter type="regex" expression="org\.unswift\.[\w\.]+\.service\.impl\.[^.]+"/>
+	</context:component-scan>
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:jdbc.properties</value>
+                <value>classpath:redis.properties</value>
+                <value>classpath:rabbitmq.properties</value>
+            </list>
+        </property>
+    </bean>
+    <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName">
+			<value>java:comp/env/jdbc/transfer</value>
+		</property>
+	</bean>
+
+    <!-- spring和MyBatis完美整合，不需要mybatis的配置映射文件 -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <!-- 自动扫描mapping.xml文件 <property name="mapperLocations" value="classpath:com/ssm/mapper/*.xml"></property> -->
+        <property name="plugins">
+        	<array>
+        		<bean class="org.unswift.core.interceptor.PageInterceptor">
+        			<property name="databaseType" value="${jdbc.type}"/>
+        			<property name="pageListSuffix" value=".*PageList$"/>
+        		</bean>
+        	</array>
+        </property>
+    </bean>
+
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="org.unswift.base.*.dao,org.unswift.gtft.*.dao" />
+    </bean>
+    <!-- mybatis related... end -->
+    
+    <bean id="mybatisRefreshHandler" class="org.unswift.core.handler.MybatisRefreshHandler">
+        <property name="sqlSessionFactory" value="sqlSessionFactory" />
+    	<property name="basePackage" value="classpath*:org/unswift/**/dao/*.xml" />
+    </bean>
+
+    <!-- transaction config related... start -->
+    <tx:annotation-driven transaction-manager="transactionManager" />
+    <bean id="transactionManager"
+        class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    <!-- transaction config related... end -->
+
+    <!-- redis config start -->
+    <!-- 配置JedisPoolConfig实例 -->
+    <bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">
+        <property name="maxIdle" value="${redis.maxIdle}" />
+        <property name="maxTotal" value="${redis.maxActive}" />
+        <property name="maxWaitMillis" value="${redis.maxWait}" />
+        <property name="testOnBorrow" value="${redis.testOnBorrow}" />
+    </bean>
+
+    <!-- 配置JedisConnectionFactory -->
+    <bean id="jedisConnectionFactory"
+        class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+        <property name="hostName" value="${redis.host}" />
+        <property name="port" value="${redis.port}" />
+        <property name="password" value="${redis.pass}" />
+        <property name="database" value="${redis.dbIndex}" />
+        <property name="poolConfig" ref="poolConfig" />
+    </bean>
+    <bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
+        <property name="connectionFactory" ref="jedisConnectionFactory" />
+    </bean>
+    <bean id="redisCacheManager" class="org.springframework.data.redis.cache.RedisCacheManager">
+        <constructor-arg name="redisOperations" ref="redisTemplate" />
+        <property name="defaultExpiration" value="${redis.expiration}" />
+    </bean>
+    <bean id="redisCacheConfig" class="org.unswift.core.cache.RedisApplication">
+        <constructor-arg ref="jedisConnectionFactory" />
+        <constructor-arg ref="redisTemplate" />
+        <constructor-arg ref="redisCacheManager" />
+    </bean>
+    
+    <!-- config bean -->
+    <bean id="configBean" class="org.unswift.core.bean.ConfigBean">
+    	<property name="databaseType" value="${jdbc.type}"/>
+    </bean>
+    
+    <bean id="baseCacheApplication" class="org.unswift.core.cache.BaseCacheApplication"/>
+    
+  	<!-- RabbitMQ -->
+    <!-- <rabbit:connection-factory id="connectionFactory" addresses="${rabbitmq.addresses}" username="${rabbitmq.username}" password="${rabbitmq.password}" channel-cache-size="${rabbitmq.channel.cache.size}" />
+    <rabbit:admin connection-factory="connectionFactory" />
+	<bean id="messageConverter" class="org.springframework.amqp.support.converter.Jackson2JsonMessageConverter" />
+	<rabbit:queue name="org.unswift.queue.admin" />
+	<rabbit:queue name="org.unswift.queue.web" />
+    <rabbit:fanout-exchange id="${rabbitmq.fanout.exchange}" name="${rabbitmq.fanout.exchange}">
+        <rabbit:bindings>
+            <rabbit:binding queue="org.unswift.queue.admin"/>
+            <rabbit:binding queue="org.unswift.queue.web"/>
+        </rabbit:bindings>
+    </rabbit:fanout-exchange>
+    <bean id="retryTemplate" class="org.springframework.retry.support.RetryTemplate">
+	    <property name="backOffPolicy">
+	        <bean class="org.springframework.retry.backoff.ExponentialBackOffPolicy">
+	            <property name="initialInterval" value="500" />
+	            <property name="multiplier" value="10.0" />
+	            <property name="maxInterval" value="10000" />
+	        </bean>
+	    </property>
+	</bean>
+	<rabbit:template id="template" message-converter="messageConverter"
+	    connection-factory="connectionFactory" reply-timeout="2000" retry-template="retryTemplate" 
+	    exchange="${rabbitmq.fanout.exchange}" queue="org.unswift.queue.admin"/>
+	
+	<rabbit:listener-container connection-factory="connectionFactory">
+      <rabbit:listener ref="spittleListener" method="onMessage" queues="org.unswift.queue.web"/>
+    </rabbit:listener-container>
+    <bean id="spittleListener" class="org.unswift.core.message.UnswiftMessageListener"/> -->
+</beans> 

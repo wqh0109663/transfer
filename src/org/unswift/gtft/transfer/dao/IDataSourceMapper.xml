@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.unswift.gtft.transfer.dao.IDataSourceMapper">
+	<resultMap id="baseResultMap" type="org.unswift.gtft.transfer.pojo.DataSource">
+		<result column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="NAME" jdbcType="VARCHAR" property="name" />
+		<result column="TYPE" jdbcType="VARCHAR" property="type" />
+		<result column="DB_TYPE" jdbcType="VARCHAR" property="dbType" />
+		<result column="DB_DRIVER" jdbcType="VARCHAR" property="dbDriver" />
+		<result column="URL" jdbcType="VARCHAR" property="url" />
+		<result column="USERNAME" jdbcType="VARCHAR" property="username" />
+		<result column="PASSWORD" jdbcType="VARCHAR" property="password" />
+		<result column="ORDER_NO" jdbcType="INTEGER" property="orderNo" />
+		<result column="MAX_ORDER_NO" jdbcType="INTEGER" property="maxOrderNo"/>
+        <result column="MIN_ORDER_NO" jdbcType="INTEGER" property="minOrderNo"/>
+		<result column="STATUS" jdbcType="INTEGER" property="status" />
+		<result column="CREATE_PERSON" jdbcType="VARCHAR" property="createPerson" />
+		<result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime" />
+		<result column="UPDATE_PERSON" jdbcType="VARCHAR" property="updatePerson" />
+		<result column="UPDATE_TIME" jdbcType="TIMESTAMP" property="updateTime" />
+	</resultMap>
+	<sql id="baseColumnList">
+		SELECT ID,NAME,TYPE,DB_TYPE,DB_DRIVER,URL,USERNAME,PASSWORD,ORDER_NO,STATUS,CREATE_PERSON,CREATE_TIME,UPDATE_PERSON,UPDATE_TIME
+	</sql>
+	<select id="findPageList" parameterType="org.unswift.gtft.transfer.pojo.DataSource" resultMap="baseResultMap">
+		<include refid="baseColumnList" />
+		,(SELECT MAX(ORDER_NO) FROM GTFT_DATA_SOURCE WHERE STATUS = 1) MAX_ORDER_NO
+		,(SELECT MIN(ORDER_NO) FROM GTFT_DATA_SOURCE WHERE STATUS = 1) MIN_ORDER_NO
+		FROM GTFT_DATA_SOURCE
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+			<if test ="vo.status!=null">
+				AND STATUS=#{vo.status}
+			</if>
+			<if test ="vo.name!=null and vo.name!=''">
+				AND NAME LIKE concat('%',#{vo.name},'%')
+			</if>
+		</trim>
+		ORDER BY ORDER_NO ASC
+	</select>
+	<insert id="insert" parameterType="org.unswift.gtft.transfer.pojo.DataSource">
+		INSERT INTO GTFT_DATA_SOURCE(ID,NAME,TYPE,DB_TYPE,DB_DRIVER,URL,USERNAME,PASSWORD,ORDER_NO,STATUS,CREATE_PERSON,CREATE_TIME,UPDATE_PERSON,UPDATE_TIME) 
+		VALUES(#{id},#{name},#{type},#{dbType},#{dbDriver},#{url},#{username},#{password},#{orderNo},#{status},#{currPerson},SYSDATE(),#{currPerson},SYSDATE())
+	</insert>
+	<select id="findById" parameterType="String" resultMap="baseResultMap">
+		<include refid="baseColumnList" />
+		FROM GTFT_DATA_SOURCE
+		WHERE ID=#{id}
+	</select>
+	<update id="updateById" parameterType="org.unswift.gtft.transfer.pojo.DataSource">
+		UPDATE GTFT_DATA_SOURCE
+		<trim prefix="SET" prefixOverrides=",">
+			,NAME=#{name},TYPE=#{type},DB_TYPE=#{dbType},DB_DRIVER=#{dbDriver},URL=#{url},USERNAME=#{username},PASSWORD=#{password},UPDATE_PERSON=#{currPerson},UPDATE_TIME=SYSDATE()
+		</trim>
+		WHERE ID=#{id}
+	</update>
+	<delete id="deleteById" parameterType="String">
+		UPDATE GTFT_DATA_SOURCE SET STATUS=0,UPDATE_PERSON=#{currPerson},UPDATE_TIME=SYSDATE() WHERE ID=#{id};
+	</delete>
+	<select id="findList" parameterType="org.unswift.gtft.transfer.pojo.DataSource" resultMap="baseResultMap">
+		<include refid="baseColumnList" />
+		FROM GTFT_DATA_SOURCE
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+			<if test ="vo.status!=null">
+				AND STATUS=#{vo.status}
+			</if>
+		</trim>
+		ORDER BY ORDER_NO ASC
+	</select>
+	<select id="findMax" parameterType="org.unswift.gtft.transfer.pojo.DataSource" resultType="int">
+		SELECT IFNULL(MAX(ORDER_NO),0)
+		FROM GTFT_DATA_SOURCE T
+	</select>
+	<insert id="updateOrderNo">
+		UPDATE GTFT_DATA_SOURCE SET ORDER_NO=#{orderNo},UPDATE_PERSON=#{currPerson},UPDATE_TIME=SYSDATE() WHERE ID=#{id};
+		UPDATE GTFT_DATA_SOURCE SET ORDER_NO=#{orderNo2},UPDATE_PERSON=#{currPerson},UPDATE_TIME=SYSDATE() WHERE ID=#{id2};
+	</insert>
+	<select id="findBefore" resultMap="baseResultMap">
+		<include refid="baseColumnList" />
+		FROM GTFT_DATA_SOURCE
+		WHERE STATUS=1 AND ORDER_NO <![CDATA[<]]>#{orderNo} ORDER BY ORDER_NO DESC LIMIT 0,1
+	</select>
+	<select id="findAfter" resultMap="baseResultMap">
+		<include refid="baseColumnList" />
+		FROM GTFT_DATA_SOURCE
+		WHERE STATUS=1 AND ORDER_NO <![CDATA[>]]>#{orderNo} ORDER BY ORDER_NO ASC LIMIT 0,1
+	</select>
+	<delete id="deleteDataSources" parameterType="org.unswift.core.pojo.DeletePojo">
+		<foreach collection="ids" item="id">
+			UPDATE GTFT_DATA_SOURCE SET STATUS=0,UPDATE_PERSON=#{currPerson},UPDATE_TIME=SYSDATE() WHERE ID=#{id};
+		</foreach>
+	</delete>
+	<delete id="deleteRecycles">
+		<foreach collection="ids" item="id">
+			DELETE FROM GTFT_DATA_SOURCE WHERE ID=#{id};
+		</foreach>
+	</delete>
+	<delete id="clearRecycle">
+		DELETE FROM GTFT_DATA_SOURCE WHERE STATUS=0
+	</delete>
+	<update id="updateStatus">
+		<foreach collection="ids" item="id">
+			UPDATE GTFT_DATA_SOURCE SET STATUS=#{status},UPDATE_PERSON=#{currPerson},UPDATE_TIME=SYSDATE() WHERE ID=#{id};
+		</foreach>
+	</update>
+
+</mapper>

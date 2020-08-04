@@ -1,0 +1,16 @@
+<meta charset="UTF-8">
+<div class="list" style="padding:5px;clear: both;">
+	<div id="search" class="search2">
+		<input type="hidden" id="exeLoggerBatchLoggerId" value="${loggerId!''}">
+		<span class="search-item" style="width:220px;">执行次：<input type="text" id="exeLoggerBatchExeBatch" autocomplete="off" class="input"></span>
+		<span class="search-item" style="width:380px;">执行时间：<input type="text" id="exeLoggerBatchStartTime" autocomplete="off" class="input">至<input type="text" id="exeLoggerBatchEndTime" autocomplete="off" class="input"></span>
+		<span class="button" onclick="$.dynamicJs.loadExeLoggerBatchList();"><i class="layui-icon">&#xe615;</i><span>查询</span></span>
+	</div>
+	<div class="list-data layui-form" id="recycle-list-container">
+		<table class="layui-hide" id="exeLoggerBatch-list" lay-filter="exeLoggerBatch-list"></table>
+	</div>
+	<span type="text/html" id="exeLoggerBatchToolBar" style="display: none;">
+		<a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="logger-batch-more">更多</a>
+	</span>
+</div>
+<script type="text/javascript" src="${path!''}/js/transfer/transferTask/exeLoggerBatch-list.js"></script>

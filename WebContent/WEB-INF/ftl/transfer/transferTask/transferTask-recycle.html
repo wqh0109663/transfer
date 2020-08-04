@@ -1,0 +1,19 @@
+<meta charset="UTF-8">
+<div class="list" style="padding:5px;clear: both;">
+	<div id="search" class="search2">
+		<span class="search-item" style="width:220px;">编号：<input type="text" id="recycleCoding" autocomplete="off" class="input"></span>
+		<span class="search-item" style="width:220px;">名称：<input type="text" id="recycleName" autocomplete="off" class="input"></span>
+		<span class="button" onclick="$.dynamicJs.loadRecycleList();"><i class="layui-icon">&#xe615;</i><span>查询</span></span>
+		<span class="button add" onclick="$.dynamicJs.recoveryRecycles();"><i class="layui-icon">&#xe618;</i><span>恢复</span></span>
+		<span class="button delete" onclick="$.dynamicJs.deleteRecycles();"><i class="layui-icon">&#x1006;</i><span>删除</span></span>
+		<span class="button recycle" onclick="$.dynamicJs.clearRecycle();"><i class="layui-icon">&#xe640;</i><span>清空</span></span>
+	</div>
+	<div class="list-data layui-form" id="recycle-list-container">
+		<table class="layui-hide" id="recycle-list" lay-filter="recycle-list"></table>
+	</div>
+	<script type="text/html" id="recycleToolBar">
+  		<a class="layui-btn layui-btn-xs" lay-event="recovery"><i class="layui-icon">&#xe618;</i>恢复</a>
+  		<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del"><i class="layui-icon">&#x1006;</i>删除</a>
+	</script>
+</div>
+<script type="text/javascript" src="${path!''}/js/transfer/transferTask/transferTask-recycle.js"></script>

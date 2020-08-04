@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.unswift.gtft.transfer.dao.ITransferTaskMapper">
+	<resultMap id="baseResultMap" type="org.unswift.gtft.transfer.pojo.TransferTask">
+		<result column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="CODING" jdbcType="VARCHAR" property="coding" />
+		<result column="NAME" jdbcType="VARCHAR" property="name" />
+		<result column="EXE_PERIOD" jdbcType="VARCHAR" property="exePeriod" />
+		<result column="FULL_EXE_PERIOD" jdbcType="VARCHAR" property="fullExePeriod" />
+		<result column="LAST_FULL_EXE_TIME" jdbcType="TIMESTAMP" property="lastFullExeTime" />
+		<result column="SOURCE_ID" jdbcType="VARCHAR" property="sourceId" />
+		<result column="SOURCE_NAME" jdbcType="VARCHAR" property="sourceName" />
+		<result column="SOURCE_TYPE" jdbcType="VARCHAR" property="sourceType" />
+		<result column="SOURCE_SQL" jdbcType="VARCHAR" property="sourceSql" />
+		<result column="SOURCE_TABLE" jdbcType="VARCHAR" property="sourceTable" />
+		<result column="SOURCE_PK" jdbcType="VARCHAR" property="sourcePk" />
+		<result column="SOURCE_LIMIT" jdbcType="INTEGER" property="sourceLimit" />
+		<result column="TARGET_ID" jdbcType="VARCHAR" property="targetId" />
+		<result column="TARGET_NAME" jdbcType="VARCHAR" property="targetName" />
+		<result column="TARGET_TABLE" jdbcType="VARCHAR" property="targetTable" />
+		<result column="TARGET_PK" jdbcType="VARCHAR" property="targetPk" />
+		<result column="TARGET_LIMIT" jdbcType="INTEGER" property="targetLimit" />
+		<result column="TARGET_RULE" jdbcType="VARCHAR" property="targetRule" />
+		<result column="NOT_EXISTS_CREATE" jdbcType="VARCHAR" property="notExistsCreate" />
+		<result column="EXE_METHOD" jdbcType="VARCHAR" property="exeMethod" />
+		<result column="CLEAR_DATA_SQL" jdbcType="VARCHAR" property="clearDataSql" />
+		<result column="LAST_UPDATE_FIELD" jdbcType="VARCHAR" property="lastUpdateField" />
+		<result column="MAX_VALUE" jdbcType="TIMESTAMP" property="maxValue" />
+		<result column="EXE_STATUS" jdbcType="INTEGER" property="exeStatus" />
+		<result column="EXE_PROGRESS" jdbcType="INTEGER" property="exeProgress" />
+		<result column="EXE_RESULT" jdbcType="INTEGER" property="exeResult" />
+		<result column="EXE_LAST_TIME" jdbcType="TIMESTAMP" property="exeLastTime" />
+		<result column="EXE_LAST_END_TIME" jdbcType="TIMESTAMP" property="exeLastEndTime" />
+		<result column="EXE_NUMBERD" jdbcType="INTEGER" property="exeNumberd" />
+		<result column="ORDER_NO" jdbcType="INTEGER" property="orderNo" />
+		<result column="MAX_ORDER_NO" jdbcType="INTEGER" property="maxOrderNo"/>
+        <result column="MIN_ORDER_NO" jdbcType="INTEGER" property="minOrderNo"/>
+		<result column="STATUS" jdbcType="INTEGER" property="status" />
+		<result column="CREATE_PERSON" jdbcType="VARCHAR" property="createPerson" />
+		<result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime" />
+		<result column="UPDATE_PERSON" jdbcType="VARCHAR" property="updatePerson" />
+		<result column="UPDATE_TIME" jdbcType="TIMESTAMP" property="updateTime" />
+	</resultMap>
+	
+	<sql id="baseColumnList">
+		SELECT ID,CODING,NAME,EXE_PERIOD,FULL_EXE_PERIOD,LAST_FULL_EXE_TIME,SOURCE_ID,SOURCE_TYPE,SOURCE_SQL,SOURCE_TABLE,SOURCE_PK,SOURCE_LIMIT,TARGET_ID,TARGET_TABLE,TARGET_PK,TARGET_LIMIT,TARGET_RULE,
+		NOT_EXISTS_CREATE,EXE_METHOD,CLEAR_DATA_SQL,LAST_UPDATE_FIELD,MAX_VALUE,ORDER_NO,STATUS,CREATE_PERSON,CREATE_TIME,UPDATE_PERSON,UPDATE_TIME
+	</sql>
+	<sql id="baseColumnList2">
+		SELECT GT.ID,GT.CODING,GT.NAME,GT.EXE_PERIOD,GT.FULL_EXE_PERIOD,GT.LAST_FULL_EXE_TIME,GT.SOURCE_ID,GT.SOURCE_TYPE,GT.SOURCE_SQL,GT.SOURCE_TABLE,GT.SOURCE_PK,
+			   GT.SOURCE_LIMIT,GT.TARGET_ID,GT.TARGET_TABLE,GT.TARGET_PK,GT.TARGET_LIMIT,GT.TARGET_RULE,GT.NOT_EXISTS_CREATE,
+			   GT.EXE_METHOD,GT.CLEAR_DATA_SQL,GT.LAST_UPDATE_FIELD,GT.MAX_VALUE,GT.ORDER_NO,GT.CREATE_PERSON,GT.CREATE_TIME,
+			   GT.UPDATE_PERSON,GT.UPDATE_TIME,
+			   T.EXE_STATUS,T.EXE_LAST_TIME,T.EXE_LAST_END_TIME,T.STATUS,T.EXE_NUMBERD
+	</sql>
+	<select id="findPageList" parameterType="org.unswift.gtft.transfer.pojo.TransferTask" resultMap="baseResultMap">
+		<include refid="baseColumnList2" />
+		,(SELECT TE.EXE_PROGRESS FROM SYS_TIMER_EXECUTE TE WHERE TE.TIMER_ID=T.ID AND TE.STATUS=1 ORDER BY EXE_START_TIME DESC LIMIT 0,1) EXE_PROGRESS
+		,(SELECT TE.EXE_RESULT FROM SYS_TIMER_EXECUTE TE WHERE TE.TIMER_ID=T.ID ORDER BY EXE_START_TIME DESC LIMIT 0,1) EXE_RESULT
+		,(SELECT DS.NAME FROM GTFT_DATA_SOURCE DS WHERE DS.ID=GT.SOURCE_ID) SOURCE_NAME
+		,(SELECT DS.NAME FROM GTFT_DATA_SOURCE DS WHERE DS.ID=GT.TARGET_ID) TARGET_NAME
+		,(SELECT MAX(ORDER_NO) FROM GTFT_TASK WHERE STATUS IN (1,2)) MAX_ORDER_NO
+		,(SELECT MIN(ORDER_NO) FROM GTFT_TASK WHERE STATUS IN (1,2)) MIN_ORDER_NO
+		FROM GTFT_TASK GT LEFT JOIN SYS_TIMER T ON GT.CODING=T.CODING
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+			<if test ="vo.searchStatus!=null">
+				AND GT.STATUS IN(${vo.searchStatus})
+			</if>
+			<if test ="vo.coding!=null and vo.coding!=''">
+				AND GT.CODING LIKE concat('%',#{vo.coding},'%')
+			</if>
+			<if test ="vo.name!=null and vo.name!=''">
+				AND GT.NAME LIKE concat('%',#{vo.name},'%')
+			</if>
+			<if test ="vo.exeStatus!=null and vo.exeStatus!=''">
+				AND T.EXE_STATUS =#{vo.exeStatus}
+			</if>
+			<if test ="vo.status!=null">
+				AND T.STATUS =#{vo.status}
+			</if>
+		</trim>
+		ORDER BY ORDER_NO ASC
+	</select>
+	<insert id="insert" parameterType="org.unswift.gtft.transfer.pojo.TransferTask">
+		INSERT INTO GTFT_TASK(ID,CODING,NAME,EXE_PERIOD,FULL_EXE_PERIOD,SOURCE_ID,SOURCE_TYPE,SOURCE_SQL,SOURCE_TABLE,SOURCE_PK,SOURCE_LIMIT,TARGET_ID,TARGET_TABLE,TARGET_PK,TARGET_LIMIT,TARGET_RULE,NOT_EXISTS_CREATE,EXE_METHOD,CLEAR_DATA_SQL,LAST_UPDATE_FIELD,MAX_VALUE,ORDER_NO,STATUS,CREATE_PERSON,CREATE_TIME,UPDATE_PERSON,UPDATE_TIME) 
+		VALUES(#{id},#{coding},#{name},#{exePeriod},#{fullExePeriod},#{sourceId},#{sourceType},#{sourceSql},#{sourceTable},#{sourcePk},#{sourceLimit},#{targetId},#{targetTable},#{targetPk},#{targetLimit},#{targetRule},#{notExistsCreate},#{exeMethod},#{clearDataSql},#{lastUpdateField},#{maxValue},#{orderNo},#{status},#{currPerson},SYSDATE(),#{currPerson},SYSDATE())
+	</insert>
+	<select id="findById" parameterType="String" resultMap="baseResultMap">
+		<include refid="baseColumnList2" />
+		FROM GTFT_TASK GT LEFT JOIN SYS_TIMER T ON GT.CODING=T.CODING
+		WHERE GT.ID=#{id}
+	</select>
+	<select id="findByCoding" parameterType="String" resultMap="baseResultMap">
+		<include refid="baseColumnList" />
+		FROM GTFT_TASK
+		WHERE CODING=#{coding}
+	</select>
+	<update id="updateById" parameterType="org.unswift.gtft.transfer.pojo.TransferTask">
+		UPDATE GTFT_TASK
+		<trim prefix="SET" prefixOverrides=",">
+			,NAME=#{name},EXE_PERIOD=#{exePeriod},FULL_EXE_PERIOD=#{fullExePeriod},SOURCE_ID=#{sourceId},SOURCE_TYPE=#{sourceType},SOURCE_SQL=#{sourceSql},SOURCE_TABLE=#{sourceTable},SOURCE_PK=#{sourcePk},SOURCE_LIMIT=#{sourceLimit},TARGET_ID=#{targetId},TARGET_TABLE=#{targetTable},TARGET_PK=#{targetPk},TARGET_LIMIT=#{targetLimit},TARGET_RULE=#{targetRule},NOT_EXISTS_CREATE=#{notExistsCreate},EXE_METHOD=#{exeMethod},CLEAR_DATA_SQL=#{clearDataSql},LAST_UPDATE_FIELD=#{lastUpdateField},UPDATE_PERSON=#{currPerson},UPDATE_TIME=SYSDATE()
+		</trim>
+		WHERE ID=#{id}
+	</update>
+	<update id="updateMaxTime" parameterType="org.unswift.gtft.transfer.pojo.TransferTask">
+		UPDATE GTFT_TASK
+		<trim prefix="SET" prefixOverrides=",">
+			,MAX_VALUE=#{maxValue},UPDATE_PERSON=#{currPerson},UPDATE_TIME=SYSDATE()
+			<if test ='lastFullExeTime!=null'>
+				,LAST_FULL_EXE_TIME = #{lastFullExeTime}
+			</if>
+		</trim>
+		WHERE ID=#{id}
+	</update>
+	<delete id="deleteById" parameterType="String">
+		UPDATE GTFT_TASK SET STATUS=0,UPDATE_PERSON=#{currPerson},UPDATE_TIME=SYSDATE() WHERE ID=#{id}
+	</delete>
+	<select id="findList" parameterType="org.unswift.gtft.transfer.pojo.TransferTask" resultMap="baseResultMap">
+		<include refid="baseColumnList" />
+		FROM GTFT_TASK
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+		</trim>
+	</select>
+	<select id="findMax" parameterType="org.unswift.gtft.transfer.pojo.TransferTask" resultType="int">
+		SELECT IFNULL(MAX(ORDER_NO),0)
+		FROM GTFT_TASK T
+	</select>
+	<select id="findCount" parameterType="org.unswift.base.system.pojo.Dictionary" resultType="int">
+		SELECT COUNT(1)
+		FROM GTFT_TASK
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+			<if test ='vo.coding!=null and vo.coding!=""'>
+				AND CODING = #{vo.coding}
+			</if>
+			<if test ='vo.noId!=null and vo.noId!=""'>
+				AND ID != #{vo.noId}
+			</if>
+		</trim>
+	</select>
+	<insert id="updateOrderNo">
+		UPDATE GTFT_TASK SET ORDER_NO=#{orderNo},UPDATE_PERSON=#{currPerson},UPDATE_TIME=SYSDATE() WHERE ID=#{id};
+		UPDATE GTFT_TASK SET ORDER_NO=#{orderNo2},UPDATE_PERSON=#{currPerson},UPDATE_TIME=SYSDATE() WHERE ID=#{id2};
+	</insert>
+	<select id="findBefore" resultMap="baseResultMap">
+		<include refid="baseColumnList" />
+		FROM GTFT_TASK
+		WHERE STATUS=1 AND ORDER_NO <![CDATA[<]]>#{orderNo} ORDER BY ORDER_NO DESC LIMIT 0,1
+	</select>
+	<select id="findAfter" resultMap="baseResultMap">
+		<include refid="baseColumnList" />
+		FROM GTFT_TASK
+		WHERE STATUS=1 AND ORDER_NO <![CDATA[>]]>#{orderNo} ORDER BY ORDER_NO ASC LIMIT 0,1
+	</select>
+	<delete id="deleteTransferTasks" parameterType="org.unswift.core.pojo.DeletePojo">
+		<foreach collection="ids" item="id">
+			UPDATE GTFT_TASK SET STATUS=0,UPDATE_PERSON=#{currPerson},UPDATE_TIME=SYSDATE() WHERE ID=#{id};
+		</foreach>
+	</delete>
+	<delete id="deleteRecycles">
+		<foreach collection="ids" item="id">
+			DELETE FROM GTFT_TASK_LOGGER_BATCH WHERE LOGGER_ID IN(SELECT ID FROM GTFT_TASK_LOGGER WHERE TASK_ID=#{id});
+			DELETE FROM GTFT_TASK_LOGGER WHERE TASK_ID=#{id};
+			DELETE FROM GTFT_TASK_FIELD_BIND WHERE TASK_ID=#{id};
+			DELETE FROM SYS_TIMER WHERE CODING IN(SELECT CODING FROM GTFT_TASK WHERE ID=#{id});
+			DELETE FROM GTFT_TASK WHERE ID=#{id};
+		</foreach>
+	</delete>
+	<delete id="clearRecycle">
+		DELETE FROM GTFT_TASK_LOGGER_BATCH WHERE LOGGER_ID IN(SELECT ID FROM GTFT_TASK_LOGGER WHERE TASK_ID IN(SELECT ID FROM GTFT_TASK WHERE STATUS=0));
+		DELETE FROM GTFT_TASK_LOGGER WHERE TASK_ID IN(SELECT ID FROM GTFT_TASK WHERE STATUS=0);
+		DELETE FROM GTFT_TASK_FIELD_BIND WHERE TASK_ID IN(SELECT ID FROM GTFT_TASK WHERE STATUS=0);
+		DELETE FROM SYS_TIMER WHERE CODING IN(SELECT CODING FROM GTFT_TASK WHERE STATUS=0);
+		DELETE FROM GTFT_TASK WHERE STATUS=0
+	</delete>
+	<update id="updateStatus">
+		<foreach collection="ids" item="id">
+			UPDATE GTFT_TASK SET STATUS=#{status},UPDATE_PERSON=#{currPerson},UPDATE_TIME=SYSDATE() WHERE ID=#{id};
+		</foreach>
+	</update>
+
+</mapper>

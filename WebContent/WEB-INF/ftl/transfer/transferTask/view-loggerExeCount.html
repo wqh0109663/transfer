@@ -1,0 +1,81 @@
+<meta charset="UTF-8">
+<#include "/common/select.html"/>
+<form id="view-loggerExeCount" class="layui-form layui-form-pane" action="">
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">执行次</label>
+		<div class="layui-input-block" style="width: 295px;">
+			<input type="text" name="exeBatch" value="${logger.exeBatch!0}" class="layui-input layui-disabled" autocomplete="off" disabled>
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">执行结果</label>
+		<div class="layui-input-block" style="width: 295px;">
+			<input type="text" name="exeBatch" value="<#if logger.exeResult?? && logger.exeResult==1>成功<#else>失败</#if>" class="layui-input layui-disabled" autocomplete="off" disabled>
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">开始时间</label>
+		<div class="layui-input-block" style="width: 295px;">
+			<input type="text" name="startTime" value="<#if logger.startTime??>${logger.startTime?string('yyyy-MM-dd HH:mm:ss')}</#if>" class="layui-input layui-disabled" autocomplete="off" disabled>
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">结束时间</label>
+		<div class="layui-input-block" style="width: 295px;">
+			<input type="text" name="endTime" value="<#if logger.endTime??>${logger.endTime?string('yyyy-MM-dd HH:mm:ss')}</#if>" class="layui-input layui-disabled" autocomplete="off" disabled>
+		</div>
+	</div>
+	<#if logger.exeMsg??>
+		<div class="layui-form-item layui-form-text" style="width: 834px;">
+			<label class="layui-form-label">错误原因</label>
+			<div class="layui-input-block">
+				<textarea name="exeMsg" autocomplete="off" class="layui-textarea layui-disabled" disabled>${logger.exeMsg!''}</textarea>
+			</div>
+		</div>
+	</#if>
+	<div class="layui-form-item layui-form-text" style="width: 834px;">
+		<label class="layui-form-label">总数据SQL</label>
+		<div class="layui-input-block">
+			<textarea name="searchSql" autocomplete="off" class="layui-textarea layui-disabled" disabled>${logger.searchSql!''}</textarea>
+		</div>
+	</div>
+	<div class="layui-form-item layui-form-text" style="width: 834px;">
+		<label class="layui-form-label">删除表状态/SQL</label>
+		<div class="layui-input-block">
+			<textarea name="deleteSql" autocomplete="off" class="layui-textarea layui-disabled" disabled>${logger.deleteSql!'未删除表'}</textarea>
+		</div>
+	</div>
+	<div class="layui-form-item layui-form-text" style="width: 834px;">
+		<label class="layui-form-label">创建表状态/SQL</label>
+		<div class="layui-input-block">
+			<textarea name="createSql" autocomplete="off" class="layui-textarea layui-disabled" disabled>${logger.createSql!'未创建表'}</textarea>
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">执行总数</label>
+		<div class="layui-input-block" style="width: 295px;">
+			<input type="text" name="totalCount" value="${logger.totalCount!0}" class="layui-input layui-disabled" autocomplete="off" disabled>
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">插入数量</label>
+		<div class="layui-input-block" style="width: 295px;">
+			<input type="text" name="insertCount" value="${logger.insertCount!0}" class="layui-input layui-disabled" autocomplete="off" disabled>
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">更新数量</label>
+		<div class="layui-input-block" style="width: 295px;">
+			<input type="text" name="updateCount" value="${logger.updateCount!0}" class="layui-input layui-disabled" autocomplete="off" disabled>
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">删除数量</label>
+		<div class="layui-input-block" style="width: 295px;">
+			<input type="text" name="deleteCount" value="${logger.deleteCount!0}" class="layui-input layui-disabled" autocomplete="off" disabled>
+		</div>
+	</div>
+</form>
+<script>
+$.form.render();
+</script>

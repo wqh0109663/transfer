@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.unswift.gtft.transfer.dao.ITaskLoggerMapper">
+	<resultMap id="baseResultMap" type="org.unswift.gtft.transfer.pojo.TaskLogger">
+		<result column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="TASK_ID" jdbcType="VARCHAR" property="taskId" />
+		<result column="EXE_BATCH" jdbcType="INTEGER" property="exeBatch" />
+		<result column="START_TIME" jdbcType="TIMESTAMP" property="startTime" />
+		<result column="END_TIME" jdbcType="TIMESTAMP" property="endTime" />
+		<result column="EXE_RESULT" jdbcType="INTEGER" property="exeResult" />
+		<result column="EXE_MSG" jdbcType="VARCHAR" property="exeMsg" />
+		<result column="SEARCH_SQL" jdbcType="VARCHAR" property="searchSql" />
+		<result column="DELETE_SQL" jdbcType="VARCHAR" property="deleteSql" />
+		<result column="TOTAL_COUNT" jdbcType="INTEGER" property="totalCount" />
+		<result column="INSERT_COUNT" jdbcType="INTEGER" property="insertCount" />
+		<result column="UPDATE_COUNT" jdbcType="INTEGER" property="updateCount" />
+		<result column="DELETE_COUNT" jdbcType="INTEGER" property="deleteCount" />
+		<result column="CREATE_SQL" jdbcType="VARCHAR" property="createSql" />
+	</resultMap>
+	<sql id="baseColumnList">
+		SELECT ID,TASK_ID,EXE_BATCH,START_TIME,END_TIME,EXE_RESULT,EXE_MSG,SEARCH_SQL,DELETE_SQL,TOTAL_COUNT,INSERT_COUNT,UPDATE_COUNT,DELETE_COUNT,CREATE_SQL
+	</sql>
+	<select id="findPageList" parameterType="org.unswift.gtft.transfer.pojo.TaskLogger" resultMap="baseResultMap">
+		<include refid="baseColumnList" />
+		FROM GTFT_TASK_LOGGER 
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+			<if test ="vo.taskId!=null and vo.taskId!=''">
+				AND TASK_ID =#{vo.taskId}
+			</if>
+			<if test ="vo.exeBatch!=null">
+				AND EXE_BATCH =#{vo.exeBatch}
+			</if>
+			<if test ="vo.exeResult!=null">
+				AND EXE_RESULT =#{vo.exeResult}
+			</if>
+			<if test ="vo.startTime!=null">
+				<if test ="vo.endTime==null">
+				AND (DATE_FORMAT(START_TIME,"%Y-%m-%d")=DATE_FORMAT(#{vo.startTime},"%Y-%m-%d")
+					OR DATE_FORMAT(END_TIME,"%Y-%m-%d")=DATE_FORMAT(#{vo.startTime},"%Y-%m-%d"))
+				</if>
+				<if test ="vo.endTime!=null">
+					<![CDATA[
+					AND ((START_TIME >= #{vo.startTime} AND START_TIME<=#{vo.endTime})
+					OR (END_TIME >= #{vo.startTime} AND END_TIME<=#{vo.endTime}))
+					]]>
+				</if>
+			</if>
+			<if test ="vo.startTime==null and vo.endTime!=null">
+				AND (DATE_FORMAT(START_TIME,"%Y-%m-%d")=DATE_FORMAT(#{vo.endTime},"%Y-%m-%d")
+					OR DATE_FORMAT(END_TIME,"%Y-%m-%d")=DATE_FORMAT(#{vo.endTime},"%Y-%m-%d"))
+			</if>
+		</trim>
+		ORDER BY START_TIME DESC
+	</select>
+	<insert id="insert" parameterType="org.unswift.gtft.transfer.pojo.TaskLogger">
+		INSERT INTO GTFT_TASK_LOGGER(ID,TASK_ID,EXE_BATCH,START_TIME) 
+		VALUES(#{id},#{taskId},#{exeBatch},SYSDATE())
+	</insert>
+	<select id="findById" parameterType="String" resultMap="baseResultMap">
+		<include refid="baseColumnList" />
+		FROM GTFT_TASK_LOGGER
+		WHERE ID=#{id}
+	</select>
+	<update id="updateById" parameterType="org.unswift.gtft.transfer.pojo.TaskLogger">
+		UPDATE GTFT_TASK_LOGGER
+		<trim prefix="SET" prefixOverrides=",">
+			,END_TIME=SYSDATE(),EXE_RESULT=#{exeResult},EXE_MSG=#{exeMsg},SEARCH_SQL=#{searchSql},DELETE_SQL=#{deleteSql},TOTAL_COUNT=#{totalCount},INSERT_COUNT=#{insertCount},UPDATE_COUNT=#{updateCount},DELETE_COUNT=#{deleteCount},CREATE_SQL=#{createSql}
+		</trim>
+		WHERE ID=#{id}
+	</update>
+	<delete id="deleteById" parameterType="String">
+		DELETE FROM GTFT_TASK_LOGGER WHERE ID=#{id}
+	</delete>
+	<select id="findList" parameterType="org.unswift.gtft.transfer.pojo.TaskLogger" resultMap="baseResultMap">
+		<include refid="baseColumnList" />
+		FROM GTFT_TASK_LOGGER
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+		</trim>
+	</select>
+	<select id="findMaxExeBatch" parameterType="String" resultType="int">
+		SELECT IFNULL(MAX(EXE_BATCH),0)
+		FROM GTFT_TASK_LOGGER T
+	</select>
+	
+</mapper>

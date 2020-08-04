@@ -1,0 +1,339 @@
+<meta charset="UTF-8">
+<#include "/common/select.html"/>
+<#include "/common/radio.html"/>
+<form id="update-transferTask" class="layui-form layui-form-pane" action="">
+	<input type="hidden" name="id" value="${transferTask.id!''}">
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">编号</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<input type="text" name="coding" value="${transferTask.coding!''}" placeholder="请输入编号" class="layui-input required layui-disabled" disabled autocomplete="off">
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">名称</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<input type="text" name="name" value="${transferTask.name!''}" placeholder="请输入名称" class="layui-input required" autocomplete="off">
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">执行速率</label>
+		<div class="layui-input-inline" style="width: 112px;margin-right:0px;">
+			<#assign exePeriod=transferTask.exePeriod?split(',')/>
+			<#assign exePeriodLength=exePeriod?size/>
+			<select name="exePeriod" class="required" lay-filter="editExePeriod" placeholder="请选择执行速率">
+				<@select selectList=$.getDictionaryList('GTFT_TASK_PERIOD','page')?if_exists value=exePeriod[0]/> 
+			</select>
+		</div>
+		<div class="layui-input-inline" style="width: 135px;margin-right:0px;">
+			<input type="text" name="exePeriodSub" value="<#if exePeriodLength &gt; 1>${exePeriod[1]}</#if>" placeholder="自定义" class="layui-input <#if exePeriodLength &lt;= 1>layui-disabled</#if>" autocomplete="off" <#if exePeriodLength &lt;= 1>disabled</#if>>
+		</div>
+		<div class="layui-input-inline" style="width: 40px;margin-right:0px;height:38px;line-height:38px;text-align:center;">
+			分钟
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">数据来源</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<select name="sourceId" class="required" placeholder="请选择数据来源">
+				<@select selectList=$.invokeMethod('dataSourceService','findAllList','page')?if_exists value=transferTask.sourceId!''/> 
+			</select>
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">获取方式</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<select name="sourceType" class="required" lay-filter="editSourceType" placeholder="请选择获取方式">
+				<@select selectList=$.getDictionaryList('GET_DATA_METHOD','page')?if_exists value=transferTask.sourceType!''/> 
+			</select>
+		</div>
+	</div>
+	<div id="sourceTable-text" class="layui-form-item layui-inline" <#if transferTask.sourceType!='table'>style="display:none;"</#if>>
+		<label class="layui-form-label">表名称</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<input type="text" name="sourceTable" value="${transferTask.sourceTable!''}" placeholder="请输入来源表" class="layui-input required" autocomplete="off">
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">主键</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<input type="text" name="sourcePk" value="${transferTask.sourcePk!''}" placeholder="请输入来源表主键" class="layui-input required" autocomplete="off">
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">抓取量/次</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<input type="text" name="sourceLimit" value="${transferTask.sourceLimit!''}" placeholder="请输入数据源每次抓取量" class="layui-input" autocomplete="off">
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">数据目标</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<select name="targetId" class="required" placeholder="请选择数据目标">
+				<@select selectList=$.invokeMethod('dataSourceService','findAllList','page')?if_exists value=transferTask.targetId/> 
+			</select>
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">表名称</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<input type="text" name="targetTable" value="${transferTask.targetTable!''}" placeholder="请输入目标表" class="layui-input required" autocomplete="off">
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">表主键</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<input type="text" name="targetPk" value="${transferTask.targetPk!''}" placeholder="请输入目标表主键" class="layui-input required" autocomplete="off">
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">更新量/次</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<input type="text" name="targetLimit" value="${transferTask.targetLimit!''}" placeholder="请输入目标源每次更新数量" class="layui-input" autocomplete="off">
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">同步规则</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<select name="targetRule" class="required" placeholder="请选择同步规则">
+				<@select selectList=$.getDictionaryList('DATA_SAVE_RULE','page')?if_exists value=transferTask.targetRule!'insert-or-update'/>
+			</select>
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">同步方式</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<select name="exeMethod" class="required" lay-filter="editExeMethod" placeholder="请选择同步方式">
+				<@select selectList=$.getDictionaryList('DATA_TRANSFER_METHOD','page')?if_exists value=transferTask.exeMethod!''/> 
+			</select>
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">时间戳名称</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<input type="text" name="lastUpdateField" value="${transferTask.lastUpdateField!''}" placeholder="请输入时间戳名称" class="layui-input" autocomplete="off">
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">创建表</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<select name="notExistsCreate" class="required" placeholder="请选择创建表方式">
+				<@select selectList=$.getDictionaryList('TABLE_CREATE_METHOD','page')?if_exists value=(transferTask.notExistsCreate!1)?string!''/> 
+			</select>
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">全量执行速率</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<select name="fullExePeriod" placeholder="请选择全量执行速率">
+				<option value="">请选择</option>
+				<@select selectList=$.getDictionaryList('GTFT_TASK_FULL_PERIOD','page')?if_exists value=transferTask.fullExePeriod!''/> 
+			</select>
+		</div>
+	</div>
+	<div class="layui-form-item layui-form-text" style="width:99.3%;">
+		<label class="layui-form-label">数据源SQL/固定查询条件</label>
+		<div class="layui-input-block">
+			<textarea name="sourceSql" placeholder="数据获取方式等于数据表时为固定查询条件，否则为数据源SQL" autocomplete="off" class="layui-textarea">${transferTask.sourceSql!''}</textarea>
+		</div>
+	</div>
+	<div id="clearDataSql-text" class="layui-form-item layui-form-text" style="<#if transferTask.exeMethod!='full'>display:none;</#if>width:99.3%;">
+		<label class="layui-form-label">全量同步时删除语句</label>
+		<div class="layui-input-block">
+			<textarea name="clearDataSql" placeholder="请输入全量同步时删除语句，空时清空表数据" autocomplete="off" class="layui-textarea">${transferTask.clearDataSql!''}</textarea>
+		</div>
+	</div>
+	<div class="layui-form-item layui-form-text" style="width:99.3%;">
+		<label class="layui-form-label">
+			关联关系
+			<span class="layui-btn layui-btn-xs" lay-event="edit" onclick="$.dynamicJs.editAutoGetFieldBind();">自动获取</span>
+		</label>
+		
+		<div class="layui-input-block">
+			<table class="layui-table" style="margin:0px;">
+				<colgroup>
+    				<col width="18%">
+    				<col width="13%">
+    				<col width="13%">
+    				<col width="8%">
+    				<col width="8%">
+    				<col width="18%">
+    				<col width="13%">
+    				<col>
+  				</colgroup>
+  				<thead>
+  					<tr>
+    					<th>目标字段</th>
+    					<th>目标字段类型</th>
+    					<th>更新规则</th>
+    					<th>字段长度</th>
+    					<th>字段精度</th>
+    					<th>来源字段/固定值</th>
+    					<th>来源字段类型</th>
+    					<th style="text-align:center;"><span class="layui-btn layui-btn-xs" lay-event="edit" onclick="$.dynamicJs.editFieldBind();">增加行</span></th>
+  					</tr>
+				</thead>
+				<tbody id="edit-fieldBind-data">
+					<#assign dataList=transferTask.fieldBindList?if_exists>
+					<#if dataList??>
+						<#list dataList as item>
+							<tr>
+								<td><input type="text" field-input="true" value="${item.targetField!''}" class="layui-input" placeholder="请输入目标字段"/></td>
+			   					<td>
+			   						<select field-input="true" placeholder="请选择目标字段类型">
+										<@select selectList=$.getDictionaryList('DATA_FIELD_TYPE','page')?if_exists value=item.targetType!''/> 
+									</select>
+			   					</td>
+			   					<td>
+			   						<select field-input="true" placeholder="请选择更新规则">
+										<@select selectList=$.getDictionaryList('FIELD_UPDATE_RULE','page')?if_exists value=item.exeRule!'each'/> 
+									</select>
+			   					</td>
+			   					<td><input type="text" field-input="true" value="${item.dataLength!0}" class="layui-input" placeholder="请输入长度"/></td>
+			   					<td><input type="text" field-input="true" value="${item.dataScale!0}" class="layui-input" placeholder="请输入精度"/></td>
+			   					<td><input type="text" field-input="true" value="${item.sourceField!''}" class="layui-input" placeholder="请输入来源字段或固定值"/></td>
+			   					<td>
+			   						<select field-input="true" placeholder="请选择来源字段类型">
+										<@select selectList=$.getDictionaryList('DATA_FIELD_TYPE','page')?if_exists value=item.sourceType!''/> 
+									</select>
+			   					</td>
+			   					<td style="text-align:center;"><span class="layui-btn layui-btn-danger layui-btn-xs" lay-event="edit" onclick="$.dynamicJs.deleteFieldBind(this);">删除行</span></td>
+							</tr>
+						</#list>
+					</#if>
+				</tbody>
+				<tr id="edit-fieldBind-model" style="display:none;">
+   					<td><input type="text" field-input="true" class="layui-input" placeholder="请输入目标字段"/></td>
+   					<td>
+   						<select field-input="true" placeholder="请选择目标字段类型">
+							<@select selectList=$.getDictionaryList('DATA_FIELD_TYPE','page')?if_exists/> 
+						</select>
+   					</td>
+   					<td>
+   						<select field-input="true" placeholder="请选择更新规则">
+							<@select selectList=$.getDictionaryList('FIELD_UPDATE_RULE','page')?if_exists value='each'/> 
+						</select>
+   					</td>
+   					<td><input type="text" field-input="true" class="layui-input" placeholder="请输入长度"/></td>
+   					<td><input type="text" field-input="true" class="layui-input" placeholder="请输入精度"/></td>
+   					<td><input type="text" field-input="true" class="layui-input" placeholder="请输入来源字段或固定值"/></td>
+   					<td>
+   						<select field-input="true" placeholder="请选择来源字段类型">
+							<@select selectList=$.getDictionaryList('DATA_FIELD_TYPE','page')?if_exists/> 
+						</select>
+   					</td>
+   					<td style="text-align:center;"><span class="layui-btn layui-btn-danger layui-btn-xs" lay-event="edit" onclick="$.dynamicJs.deleteFieldBind(this);">删除行</span></td>
+				</tr>
+			</table>
+		</div>
+	</div>
+</form>
+<div class="tabs-bottom">
+	<span class="button-min-02" onclick="$.dynamicJs.testTransferTask2();">测试</span>
+	<span class="button-min-02" onclick="$.dynamicJs.updateTransferTask();">更新</span>
+	<span class="button-min-02 cancel" onclick="$.dynamicJs.closeTransferTask('editTransferTask');">关闭</span>
+</div>
+<script>
+$.form.render();
+$.form.on('select(editExePeriod)', function(data){
+	if(data.elem.value==0){
+		$("#update-transferTask [name='exePeriodSub']").removeClass("layui-disabled").attr("disabled",false);
+	}else{
+		$("#update-transferTask [name='exePeriodSub']").addClass("layui-disabled").attr("disabled",true).val("");
+	}
+});
+$.form.on('select(editSourceType)', function(data){
+	if(data.elem.value=='table'){
+		$("#update-transferTask #sourceTable-text").show();
+	}else{
+		$("#update-transferTask #sourceTable-text").hide().val("");
+	}
+});
+$.form.on('select(editExeMethod)', function(data){
+	if(data.elem.value=='full'){
+		$("#update-transferTask #clearDataSql-text").show();
+	}else{
+		$("#update-transferTask #clearDataSql-text").hide().val("");
+	}
+});
+(function(page){
+	var fieldMapper={};
+	<#assign dataList=$.getDictionaryList('DATA_FIELD_TYPE','page')?if_exists/>
+	<#if dataList??>
+		<#list dataList as item>
+			fieldMapper.${item.coding!''}="${item.name!''}";
+		</#list>
+	</#if>
+	
+	page.editFieldBind=function(){
+		var fieldBind=$("#edit-fieldBind-model").clone(true).attr("id","").show();
+		var dataList=$("#edit-fieldBind-data");
+		var length=dataList.children().length;
+		fieldBind.attr("dataindex",length).appendTo(dataList);
+		fieldBind.find("input,select").addClass("required");
+		$.form.render('update-transferTask','select');
+		return fieldBind;
+	};
+	page.deleteFieldBind=function(button){
+		$(button).parent().parent().remove();
+	}
+	page.getFieldBindData2=function(){
+		var dataList=[];
+		var data,inputs,index=1;
+		$("#edit-fieldBind-data").children().each(function(){
+			inputs=$(this).find("[field-input='true']");
+			data={
+				targetField	:	inputs.eq(0).val(),
+				targetType	:	inputs.eq(1).val(),
+				exeRule		:	inputs.eq(2).val(),
+				dataLength	:	inputs.eq(3).val(),
+				dataScale	:	inputs.eq(4).val(),
+				sourceField	:	inputs.eq(5).val(),
+				sourceType	:	inputs.eq(6).val(),
+				orderNo		:	index
+			};
+			dataList.push(data);
+			index++;
+		});
+		return dataList;
+	};
+	page.editAutoGetFieldBind=function(){
+		$("#edit-fieldBind-data").html("");
+		if(!$.valiForm('update-transferTask')){
+			return false;
+		}
+		var sourceType=$("#update-transferTask [name='sourceType']").val();
+		var sql;
+		if(sourceType=='table'){
+			sql=$("#update-transferTask [name='sourceTable']").val();
+		}else{
+			sql=$("#update-transferTask [name='sourceSql']").val();
+		}
+		if(!sql){
+			$.layer.alert("无法完成请求，可能得原因为：获取方式=SQL语句时，数据源SQL必须不能位空",{icon: 2});
+			return false;
+		}
+		var sourceId=$("#update-transferTask [name='sourceId']").val();
+		$.post(window.PATH+"/transfer/autoGetFieldBind",{sourceId:sourceId,type:sourceType,tableName:sql},function(data){
+			if(data.success){
+				if(data.fields){
+					var fieldBind,inputs;
+					for (var i = 0, length=data.fields.length; i < length; i++) {
+						fieldBind=page.editFieldBind();
+						inputs=fieldBind.find("[field-input='true']");
+						inputs.eq(0).val(data.fields[i].fieldName);
+						inputs.eq(1).val(data.fields[i].fieldType);
+						inputs.eq(2).val("each");
+						inputs.eq(3).val(data.fields[i].dataLength||0);
+						inputs.eq(4).val(data.fields[i].dataScale||0);
+						inputs.eq(5).val(data.fields[i].fieldName);
+						inputs.eq(6).val(data.fields[i].fieldType);
+					}
+					$.form.render('update-transferTask','select');
+				}
+			}else{
+				$.layer.alert("获取失败，原因："+data.msg,{icon: 2});
+			}
+		},'json');
+	};
+})($.dynamicJs);
+</script>

@@ -1,0 +1,223 @@
+<meta charset="UTF-8">
+<#include "/common/select.html"/>
+<#include "/common/radio.html"/>
+<form id="view-transferTask" class="layui-form layui-form-pane" action="">
+	<input type="hidden" name="id" value="${transferTask.id!''}">
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">编号</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<input type="text" name="coding" value="${transferTask.coding!''}" class="layui-input layui-disabled" disabled autocomplete="off">
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">名称</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<input type="text" name="name" value="${transferTask.name!''}" class="layui-input layui-disabled" autocomplete="off" disabled>
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">执行速率</label>
+		<div class="layui-input-inline" style="width: 112px;margin-right:0px;">
+			<#assign exePeriod=transferTask.exePeriod?split(',')/>
+			<#assign exePeriodLength=exePeriod?size/>
+			<select name="exePeriod" class="layui-disabled" disabled>
+				<@select selectList=$.getDictionaryList('GTFT_TASK_PERIOD','page')?if_exists value=exePeriod[0]/> 
+			</select>
+		</div>
+		<div class="layui-input-inline" style="width: 135px;margin-right:0px;">
+			<input type="text" name="exePeriodSub" value="<#if exePeriodLength &gt; 1>${exePeriod[1]}</#if>" class="layui-input layui-disabled" autocomplete="off" disabled>
+		</div>
+		<div class="layui-input-inline" style="width: 40px;margin-right:0px;height:38px;line-height:38px;text-align:center;">
+			分钟
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">数据来源</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<select name="sourceId" class="layui-disabled" disabled>
+				<@select selectList=$.invokeMethod('dataSourceService','findAllList','page')?if_exists value=transferTask.sourceId!''/> 
+			</select>
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">获取方式</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<select name="sourceType" class="layui-disabled" disabled>
+				<@select selectList=$.getDictionaryList('GET_DATA_METHOD','page')?if_exists value=transferTask.sourceType!''/> 
+			</select>
+		</div>
+	</div>
+	<div id="sourceTable-text" class="layui-form-item layui-inline" <#if transferTask.sourceType!='table'>style="display:none;"</#if>>
+		<label class="layui-form-label">表名称</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<input type="text" name="sourceTable" value="${transferTask.sourceTable!''}" class="layui-input layui-disabled" autocomplete="off" disabled>
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">主键</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<input type="text" name="sourcePk" value="${transferTask.sourcePk!''}" class="layui-input layui-disabled" autocomplete="off" disabled>
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">抓取量/次</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<input type="text" name="sourceLimit" value="${transferTask.sourceLimit!''}" class="layui-input layui-disabled" autocomplete="off" disabled>
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">数据目标</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<select name="targetId" class="layui-disabled" disabled>
+				<@select selectList=$.invokeMethod('dataSourceService','findAllList','page')?if_exists value=transferTask.targetId/> 
+			</select>
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">表名称</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<input type="text" name="targetTable" value="${transferTask.targetTable!''}" class="layui-input layui-disabled" autocomplete="off" disabled>
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">表主键</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<input type="text" name="targetPk" value="${transferTask.targetPk!''}" class="layui-input layui-disabled" autocomplete="off" disabled>
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">更新量/次</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<input type="text" name="targetLimit" value="${transferTask.targetLimit!''}" class="layui-input layui-disabled" autocomplete="off" disabled>
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">同步规则</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<select name="targetRule" class="layui-disabled" disabled>
+				<@select selectList=$.getDictionaryList('DATA_SAVE_RULE','page')?if_exists value=transferTask.targetRule!'insert-or-update'/>
+			</select>
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">同步方式</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<select name="exeMethod" class="layui-disabled" disabled>
+				<@select selectList=$.getDictionaryList('DATA_TRANSFER_METHOD','page')?if_exists value=transferTask.exeMethod!''/> 
+			</select>
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">时间戳名称</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<input type="text" name="lastUpdateField" value="${transferTask.lastUpdateField!''}" class="layui-input layui-disabled" autocomplete="off" disabled>
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">时间戳值</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<input type="text" name="maxValue" value="<#if transferTask.maxValue??>${transferTask.maxValue?string('yyyy-MM-dd HH:mm:ss')}</#if>" class="layui-input layui-disabled" autocomplete="off" disabled>
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">创建表</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<select name="notExistsCreate" class="layui-disabled" disabled>
+				<@select selectList=$.getDictionaryList('TABLE_CREATE_METHOD','page')?if_exists value=transferTask.notExistsCreate?string!''/> 
+			</select>
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">已执行次数</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<input type="text" name="exeNumberd" value="${transferTask.exeNumberd!0}" class="layui-input layui-disabled" autocomplete="off" disabled>
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">最近开始时间</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<input type="text" name="exeLastTime" value="<#if transferTask.exeLastTime??>${transferTask.exeLastTime?string('yyyy-MM-dd HH:mm:ss')}</#if>" class="layui-input layui-disabled" autocomplete="off" disabled>
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">最近完成时间</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<input type="text" name="exeLastEndTime" value="<#if transferTask.exeLastEndTime??>${transferTask.exeLastEndTime?string('yyyy-MM-dd HH:mm:ss')}</#if>" class="layui-input layui-disabled" autocomplete="off" disabled>
+		</div>
+	</div>
+	<div class="layui-form-item layui-inline">
+		<label class="layui-form-label">所花时间</label>
+		<div class="layui-input-block" style="width: 285px;">
+			<input type="text" name="exeTime" value="${transferTask.exeTime!''}" class="layui-input layui-disabled" autocomplete="off" disabled>
+		</div>
+	</div>
+	<div class="layui-form-item layui-form-text" style="width:99.3%;">
+		<label class="layui-form-label">数据源SQL/固定查询条件</label>
+		<div class="layui-input-block">
+			<textarea name="sourceSql" autocomplete="off" class="layui-textarea layui-disabled" disabled>${transferTask.sourceSql!''}</textarea>
+		</div>
+	</div>
+	<div id="clearDataSql-text" class="layui-form-item layui-form-text" style="<#if transferTask.exeMethod!='full'>display:none;</#if>width:99.3%;">
+		<label class="layui-form-label">全量同步时删除语句</label>
+		<div class="layui-input-block">
+			<textarea name="clearDataSql" autocomplete="off" class="layui-textarea layui-disabled" disabled>${transferTask.clearDataSql!''}</textarea>
+		</div>
+	</div>
+	<div class="layui-form-item layui-form-text" style="width:99.3%;">
+		<label class="layui-form-label">
+			关联关系
+		</label>
+		
+		<div class="layui-input-block">
+			<table class="layui-table" style="margin:0px;">
+				<colgroup>
+    				<col width="20%">
+    				<col width="13%">
+    				<col width="13%">
+    				<col width="13%">
+    				<col width="20%">
+    				<col>
+  				</colgroup>
+  				<thead>
+  					<tr>
+    					<th>目标字段</th>
+    					<th>目标字段类型</th>
+    					<th>更新规则</th>
+    					<th>目标字段长度</th>
+    					<th>来源字段/固定值</th>
+    					<th>来源字段类型</th>
+  					</tr>
+				</thead>
+				<tbody id="view-fieldBind-data">
+					<#assign dataList=transferTask.fieldBindList?if_exists>
+					<#if dataList??>
+						<#list dataList as item>
+							<tr>
+								<td><input type="text" value="${item.targetField!''}" class="layui-input layui-disabled" disabled/></td>
+			   					<td>
+			   						<input type="text" value="${$.getDictionaryName('DATA_FIELD_TYPE',item.targetType!'')?if_exists}" class="layui-input layui-disabled" disabled/>
+			   					</td>
+			   					<td>
+			   						<input type="text" value="${$.getDictionaryName('FIELD_UPDATE_RULE',item.exeRule!'each')?if_exists}" class="layui-input layui-disabled" disabled/>
+			   					</td>
+			   					<td><input type="text" value="${item.dataLength!0}" class="layui-input layui-disabled" disabled/></td>
+			   					<td><input type="text" value="${item.sourceField!''}" class="layui-input layui-disabled" disabled/></td>
+			   					<td>
+			   						<input type="text" value="${$.getDictionaryName('DATA_FIELD_TYPE',item.sourceType!'')?if_exists}" class="layui-input layui-disabled" disabled/>
+			   					</td>
+							</tr>
+						</#list>
+					</#if>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</form>
+<div class="tabs-bottom">
+	<span class="button-min-02" onclick="$.dynamicJs.testTransferTask3();">测试</span>
+	<span class="button-min-02" onclick="$.dynamicJs.exeHistory('${transferTask.id!''}','${transferTask.coding!''}','${transferTask.name!''}');">执行历史</span>
+	<span class="button-min-02 cancel" onclick="$.dynamicJs.closeTransferTask('viewTransferTask');">关闭</span>
+</div>
+<script>
+$.form.render();
+</script>

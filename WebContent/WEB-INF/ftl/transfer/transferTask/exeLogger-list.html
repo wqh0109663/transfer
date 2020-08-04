@@ -1,0 +1,17 @@
+<meta charset="UTF-8">
+<div class="list" style="padding:5px;clear: both;">
+	<div id="search" class="search2">
+		<input type="hidden" id="exeLoggerTaskId" value="${taskId!''}">
+		<span class="search-item" style="width:220px;">执行次：<input type="text" id="exeLoggerExeBatch" autocomplete="off" class="input"></span>
+		<span class="search-item" style="width:380px;">执行时间：<input type="text" id="exeLoggerStartTime" autocomplete="off" class="input">至<input type="text" id="exeLoggerEndTime" autocomplete="off" class="input"></span>
+		<span class="button" onclick="$.dynamicJs.loadExeLoggerList();"><i class="layui-icon">&#xe615;</i><span>查询</span></span>
+	</div>
+	<div class="list-data layui-form" id="recycle-list-container">
+		<table class="layui-hide" id="exeLogger-list" lay-filter="exeLogger-list"></table>
+	</div>
+	<span type="text/html" id="exeLoggerToolBar" style="display: none;">
+		<a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="logger-exe-count">更多</a>
+  		<a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="logger-view">执行明细</a>
+	</span>
+</div>
+<script type="text/javascript" src="${path!''}/js/transfer/transferTask/exeLogger-list.js"></script>

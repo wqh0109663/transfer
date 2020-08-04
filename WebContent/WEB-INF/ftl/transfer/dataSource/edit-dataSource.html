@@ -1,0 +1,80 @@
+<meta charset="UTF-8">
+<#include "/common/select.html"/>
+<form id="update-dataSource" class="layui-form layui-form-pane" action="">
+	<input type="hidden" name="id" value="${dataSource.id!''}">
+	<div class="layui-form-item">
+		<label class="layui-form-label">名称</label>
+		<div class="layui-input-block">
+			<input type="text" name="name" value="${dataSource.name!''}" placeholder="请输入名称" class="layui-input required" autocomplete="off">
+		</div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">类型</label>
+		<div class="layui-input-block">
+			<select name="type" class="required" lay-filter="type" placeholder="请选择类型">
+				<@select selectList=$.getDictionaryList('DATA_SOURCE_TYPE','page')?if_exists value=dataSource.type!''/> 
+			</select>
+		</div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">数据库类型</label>
+		<div class="layui-input-block">
+			<select id="dbType" name="dbType" lay-filter="dbType" class="required" placeholder="请输入数据库类型">
+				<option value="">请选择</option>
+				<@select selectList=$.getDictionaryList('DATABASE_TYPE','page')?if_exists value=dataSource.dbType!'' extend='description'/> 
+			</select>
+		</div>
+	</div>
+	<div id="db-conn-container" <#if dataSource.type!='db-conn'>style="display:none;"</#if>>
+		<div class="layui-form-item">
+			<label class="layui-form-label">数据库驱动</label>
+			<div class="layui-input-block">
+				<input id="dbDriver" type="text" name="dbDriver" value="${dataSource.dbDriver!''}" placeholder="请输入数据库驱动" class="layui-input <#if dataSource.type=='db-conn'>required</#if>" autocomplete="off">
+			</div>
+		</div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">数据库url</label>
+		<div class="layui-input-block">
+			<input id="url" type="text" name="url" value="${dataSource.url!''}" placeholder="请输入数据库url" class="layui-input required" autocomplete="off">
+		</div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">数据库用户名</label>
+		<div class="layui-input-block">
+			<input id="username" type="text" name="username" value="${dataSource.username!''}" placeholder="请输入数据库用户名" class="layui-input <#if dataSource.type=='db-conn'>required</#if>" autocomplete="off">
+		</div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">数据库密码</label>
+		<div class="layui-input-block">
+			<input id="password" type="text" name="password" value="${dataSource.password!''}" placeholder="请输入数据库密码" class="layui-input <#if dataSource.type=='db-conn'>required</#if>" autocomplete="off">
+		</div>
+	</div>
+</form>
+<script>
+$.form.render();
+$.form.on('select(type)', function(data){
+	if(data.elem.value=='db-conn'){
+		$("#db-conn-container").show();
+		$("#dbDriver,#username,#password").addClass("required");
+	}else{
+		$("#db-conn-container").hide();
+		$("#dbDriver,#username,#password").removeClass("required");
+	}
+	$("#dbType").val("");
+	$("#dbDriver").val("");
+	$("#url").val("");
+	$("#username").val("");
+	$("#password").val("");
+	$.form.render('select');
+});
+$.form.on('select(dbType)', function(data){
+	var dbInfo=$(data.elem).find("option:selected").attr("description");
+	var index=dbInfo.indexOf(',');
+	$("#dbDriver").val(dbInfo.substring(0, index));
+	$("#url").val(dbInfo.substring(index+1));
+	$("#username").val("");
+	$("#password").val("");
+});
+</script>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.unswift.gtft.transfer.dao.ITaskFieldBindMapper">
+	<resultMap id="baseResultMap" type="org.unswift.gtft.transfer.pojo.TaskFieldBind">
+		<result column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="TASK_ID" jdbcType="VARCHAR" property="taskId" />
+		<result column="SOURCE_FIELD" jdbcType="VARCHAR" property="sourceField" />
+		<result column="SOURCE_TYPE" jdbcType="VARCHAR" property="sourceType" />
+		<result column="TARGET_FIELD" jdbcType="VARCHAR" property="targetField" />
+		<result column="TARGET_TYPE" jdbcType="VARCHAR" property="targetType" />
+		<result column="DATA_LENGTH" jdbcType="VARCHAR" property="dataLength" />
+		<result column="DATA_SCALE" jdbcType="VARCHAR" property="dataScale" />
+		<result column="EXE_RULE" jdbcType="VARCHAR" property="exeRule" />
+		<result column="ORDER_NO" jdbcType="INTEGER" property="orderNo" />
+		<result column="STATUS" jdbcType="INTEGER" property="status" />
+		<result column="CREATE_PERSON" jdbcType="VARCHAR" property="createPerson" />
+		<result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime" />
+		<result column="UPDATE_PERSON" jdbcType="VARCHAR" property="updatePerson" />
+		<result column="UPDATE_TIME" jdbcType="TIMESTAMP" property="updateTime" />
+	</resultMap>
+	<sql id="baseColumnList">
+		SELECT ID,TASK_ID,SOURCE_FIELD,SOURCE_TYPE,TARGET_FIELD,TARGET_TYPE,DATA_LENGTH,DATA_SCALE,EXE_RULE,ORDER_NO,STATUS,CREATE_PERSON,CREATE_TIME,UPDATE_PERSON,UPDATE_TIME
+	</sql>
+	<insert id="insert" parameterType="org.unswift.gtft.transfer.pojo.TaskFieldBind">
+		INSERT INTO GTFT_TASK_FIELD_BIND(ID,TASK_ID,SOURCE_FIELD,SOURCE_TYPE,TARGET_FIELD,TARGET_TYPE,DATA_LENGTH,DATA_SCALE,EXE_RULE,ORDER_NO,STATUS,CREATE_PERSON,CREATE_TIME,UPDATE_PERSON,UPDATE_TIME) 
+		VALUES(#{id},#{taskId},#{sourceField},#{sourceType},#{targetField},#{targetType},#{dataLength},#{dataScale},#{exeRule},#{orderNo},#{status},#{currPerson},SYSDATE(),#{currPerson},SYSDATE())
+	</insert>
+	<delete id="deleteByTaskId" parameterType="String">
+		DELETE FROM GTFT_TASK_FIELD_BIND WHERE TASK_ID=#{taskId}
+	</delete>
+	<select id="findList" parameterType="org.unswift.gtft.transfer.pojo.TaskFieldBind" resultMap="baseResultMap">
+		<include refid="baseColumnList" />
+		FROM GTFT_TASK_FIELD_BIND
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+			<if test ='vo.taskId!=null and vo.taskId!=""'>
+				AND TASK_ID = #{vo.taskId}
+			</if>
+		</trim>
+		ORDER BY ORDER_NO ASC
+	</select>
+</mapper>

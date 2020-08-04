@@ -1,0 +1,102 @@
+<div class="index-plate" <#if plate.width?? && plate.width==1>screen="true"</#if>>
+	<div class="layui-collapse" lay-accordion="">
+		<div class="layui-colla-item">
+			<h2 class="layui-colla-title">
+				数据同步任务
+				<span class="more" onclick="loadUrl('/gtft-transfer/transfer/transferTaskPageList')">更多<i class="layui-icon">&#xe65b;</i></span>
+			</h2>
+			<div class="layui-colla-content layui-show">
+				<table class="layui-table" lay-skin="line" lay-size="sm">
+					<colgroup>
+						<col width="5%">
+						<col width="15%">
+						<col width="20%">
+						<col width="20%">
+						<col>
+					</colgroup>
+					<thead>
+						<tr>
+							<th>编号</th>
+							<th>任务名称</th>
+							<th>来源</th>
+							<th>目标</th>
+							<th>进度</th>
+						</tr>
+					</thead>
+					<tbody id="dataTask-body">
+						<#if dataTaskPage?exists>
+							<#assign dataList=dataTaskPage.data?if_exists>
+							<#if dataList??>
+								<#list dataList as item>
+									<tr id="${item.id!''}">
+										<td>${item.coding!''}</td>
+										<td>${item.name!''}</td>
+										<td>${item.sourceName!''}[${item.sourceTable!''}]</td>
+										<td>${item.targetName!''}[${item.targetTable!''}]</td>
+										<td>
+											<span style="display: inline-block;width:100%;">
+												<div class="layui-progress" lay-filter="process-${item.id!''}" lay-showPercent="yes">
+													<div class="layui-progress-bar" lay-percent="${item.exeProgress!0}%"></div>
+												</div>
+											</span>
+										</td>
+									</tr>
+								</#list>
+							</#if>
+						</#if>
+					</tbody>
+					<tr id="dataTask-model" style="display: none;">
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td>
+							<span style="display: inline-block;width:100%;">
+								<div class="layui-progress" lay-filter="process-" lay-showPercent="yes">
+									<div class="layui-progress-bar" lay-percent="0%"></div>
+								</div>
+							</span>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+		(function(page){
+			var interval=window.setInterval(function(){
+				$.get(window.PATH+"/transfer/plateDataTask",{},function(page){
+					if(page){
+						var dataTaskBody=$("#dataTask-body");
+						dataTaskBody.children().attr("load","false");
+						var dataList=page.data, taskNode, childs;
+						var newData=false;
+						for (var i = 0, length=dataList.length; i < length; i++) {
+							taskNode=$("#"+dataList[i].id);
+							if(taskNode.exists()){
+								taskNode.attr("load","true");
+								$.element.progress('process-'+dataList[i].id, (dataList[i].exeProgress||0)+"%");
+							}else{
+								taskNode=$("#dataTask-model").clone(true).attr("id","dataTask-"+i).show().attr("load","true");
+								childs=taskNode.children();
+								childs.eq(0).html(dataList[i].coding);
+								childs.eq(1).html(dataList[i].name);
+								childs.eq(2).html(dataList[i].sourceName+'['+dataList[i].sourceTable+']');
+								childs.eq(3).html(dataList[i].targetName+'['+dataList[i].targetTable+']');
+								taskNode.find(".layui-progress").attr("lay-filter","process-"+dataList[i].id);
+								taskNode.find(".layui-progress-bar").attr("lay-percent",dataList[i].exeProgress+'%')
+								dataTaskBody.append(taskNode);
+								newData=true;
+							}
+						}
+						if(newData){
+							$.element.init();
+						}
+						dataTaskBody.find("[load='false']").remove();
+					}
+				},'json')
+			},5000);
+			$.intervals.push(interval);
+		})($.dynamicJs);
+	</script>
+</div>

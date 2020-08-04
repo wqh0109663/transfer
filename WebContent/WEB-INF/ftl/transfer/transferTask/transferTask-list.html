@@ -1,0 +1,37 @@
+<meta charset="UTF-8">
+<#include "/common/content-tabs-title.html"/>
+<div class="layui-tab-content">
+	<div class="layui-tab-item layui-show">
+		<div class="list" id="page-list" type="list">
+			<div id="search" class="search">
+				<span class="search-item" style="width:220px;">编号：<input type="text" id="searchCoding" class="input"></span>
+				<span class="search-item" style="width:220px;">名称：<input type="text" id="searchName" class="input"></span>
+				<span class="button" onclick="$.dynamicJs.loadList();"><i class="layui-icon">&#xe615;</i><span>查询</span></span>
+				<span class="button add" onclick="$.dynamicJs.addTransferTask();"><i class="layui-icon">&#xe654;</i><span>增加</span></span>
+				<span class="button delete" onclick="$.dynamicJs.deleteTransferTasks();"><i class="layui-icon">&#x1006;</i><span>删除</span></span>
+				<span class="button recycle" onclick="$.dynamicJs.transferTaskRecycle();"><i class="layui-icon">&#xe640;</i><span>回收站</span></span>
+			</div>
+			<div class="list-data layui-form" id="list-container">
+				<table class="layui-hide" id="transferTask-list" lay-filter="transferTask-list"></table>
+			</div>
+			<script type="text/html" id="issueToolBar">
+  				<input type="checkbox" name="issue" value="{{d.id}}" lay-skin="switch" lay-text="发布|草稿" lay-filter="issueModel" {{ d.status==2?'checked':''}}>
+			</script>
+			<script type="text/html" id="startToolBar">
+  				{{ d.coding}}<i class="layui-icon icon-button" title="启动" lay-event="start" style="display:{{ d.status!=2?'none':''}};">&#xe652;</i>
+			</script>
+			<script type="text/html" id="moveToolBar">
+  				<span class="up-icon" lay-event="up" style="display:{{ d.orderNo<=d.minOrderNo?'none':''}};"></span>
+  				<span class="down-icon" lay-event="down" style="display:{{ d.orderNo>=d.maxOrderNo?'none':''}};"></span>
+			</script>
+			<script type="text/html" id="toolBar">
+				<a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="view"><i class="layui-icon">&#xe63c;</i>明细</a>
+  				<a class="layui-btn layui-btn-xs" lay-event="edit"><i class="layui-icon">&#xe642;</i>编辑</a>
+  				<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del" style="display:{{ d.status==2?'none':''}};"><i class="layui-icon">&#x1006;</i>删除</a>
+			</script>
+		</div>
+	</div>
+</div>
+<script type="text/javascript" src="${path!''}/base/js/common/content-list.js"></script>
+<script type="text/javascript" src="${path!''}/js/transfer/transferTask/transferTask-list.js"></script>
+</div>
